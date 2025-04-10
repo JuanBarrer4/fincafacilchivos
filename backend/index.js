@@ -1,39 +1,40 @@
 import express from 'express';
-import Myroutes from '../backend/routes/routes.mjs';
-import AuthRoutes from '../backend/routes/authroute.mjs';
 import mongoose from 'mongoose';
-import path from 'path';
 import dotenv from 'dotenv';
-
+import path from 'path';
 import { fileURLToPath } from 'url';
 
+// Importar rutas
+import Myroutes from './routes/routes.mjs';
+import AuthRoutes from './routes/authroute.mjs';
+
+// Configurar rutas y constantes
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = express();
-const PORT = 8080;
-
 dotenv.config();
 
-const uri = 'mongodb+srv://nuncho:nuncho12@cluster0.g63qsew.mongodb.net/fincaFacil?retryWrites=true&w=majority&appName=Cluster0';
+const app = express();
+const PORT = process.env.PORT || 8080;
 
-app.use(express.static(path.join(__dirname, '../frontend/view')));
-
+// Middleware para JSON
 app.use(express.json());
 
-// Unir rutas
-app.use('/', Myroutes);
+// Servir archivos estáticos (HTML, CSS, JS frontend)
+app.use(express.static(path.join(__dirname, '../frontend/view')));
 
-app.use('/api', AuthRoutes); // ruta de login
+// Rutas
+app.use('/', Myroutes); // rutas generales
+app.use('/api', AuthRoutes); // login, auth
 
-mongoose.connect(uri)
+// Conexión a MongoDB
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('✅ Conexión a MongoDB exitosa');
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
     });
   })
   .catch((error) => {
     console.error('❌ Error al conectar a MongoDB:', error.message);
   });
-
